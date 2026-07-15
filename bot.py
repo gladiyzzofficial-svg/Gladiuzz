@@ -53,15 +53,25 @@ def moderate(message):
 @bot.message_handler(commands=['addword'])
 def add_word(message):
     if message.from_user.id not in get_admins():
+        bot.reply_to(message, "❌ У тебя нет прав.")
         return
     try:
         word = message.text.split(maxsplit=1)[1].strip().lower()
-        cursor.execute("INSERT INTO bad_words (word) VALUES (?)", (word,))
+        if not word:
+            bot.reply_to(message, "Использование: /addword слово")
+            return
+            
+        cursor.execute("INSERT OR IGNORE INTO bad_words (word) VALUES (?)", (word,))
         conn.commit()
-        bot.reply_to(message, f"✅ Слово '{word}' добавлено в чёрный список.")
-    except:
-        bot.reply_to(message, "❌ Слово уже существует или ошибка.")
-
+        
+        if cursor.rowcount > 0:
+            bot.reply_to(message, f"✅ Слово '{word}' добавлено в чёрный список.")
+        else:
+            bot.reply_to(message, f"❌ Слово '{word}' уже существует.")
+    except IndexError:
+        bot.reply_to(message, "Использование: /addword слово")
+    except Exception as e:
+        bot.reply_to(message, f"Ошибка: {e}")
 @bot.message_handler(commands=['delword'])
 def del_word(message):
     if message.from_user.id not in get_admins():
