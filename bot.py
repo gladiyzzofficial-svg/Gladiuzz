@@ -11,7 +11,7 @@ cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS bad_words (word TEXT PRIMARY KEY)''')
 
 # Слова для бана (добавляй сюда)
-bad_words_list = ["бля", "сука", "хуй", "пизд", "еб", "муд", "нахуй", "гандон", "еблан"]
+bad_words_list = [""]
 
 for word in bad_words_list:
     cursor.execute("INSERT OR IGNORE INTO bad_words (word) VALUES (?)", (word.lower(),))
