@@ -15,7 +15,11 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS admins (user_id INTEGER PRIMARY KEY
 # Добавляем первого админа, если никого нет
 cursor.execute("SELECT COUNT(*) FROM admins")
 if cursor.fetchone()[0] == 0:
-    cursor.execute("INSERT INTO admins (user_id) VALUES (?)", (6296059302,1009623720))  # ← Замени на свой ID!
+    admin_ids = [6296859382, 1009623720]  # ← твои ID
+    for user_id in admin_ids:
+        cursor.execute("INSERT OR IGNORE INTO admins (user_id) VALUES (?)", (user_id,))
+    conn.commit()
+    print(f"Добавлено {len(admin_ids)} администраторов")
 
 conn.commit()
 
