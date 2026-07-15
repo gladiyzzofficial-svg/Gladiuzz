@@ -7,8 +7,8 @@ bot = telebot.TeleBot(TOKEN)
 
 # Расширенный список плохих слов (можно дополнять)
 BAD_WORDS = [
-    "бля", "сука", "хуй", "пизд", "еб", "муд", "нахуй", "гандон", 
-    "еблан", "pidor", "fuck", "shit", "asshole", "cunt", "nigger"
+    "", "", "хуй", "", "", "", "", "", 
+    "", "", "", "", "", "", ""
 ]
 
 @bot.message_handler(func=lambda message: True)
