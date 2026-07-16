@@ -29,7 +29,6 @@ BOT_USERNAME = BOT_INFO.username
 print(f"🤖 Бот запущен как: @{BOT_USERNAME}")
 
 # ====================== GEMINI ======================
-# Корректная проверка как для старого формата (AIza), так и для нового формата (AQ.)
 is_key_valid = GEMINI_API_KEY.startswith('AIzaSy') or GEMINI_API_KEY.startswith('AQ.')
 print(f"🔑 GEMINI_API_KEY загружен: {'Да ✅' if is_key_valid else 'НЕТ ❌'}")
 
@@ -38,7 +37,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 def get_gemini_response(user_message):
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",  # Используем актуальную модель вместо устаревшей 1.5
             contents=user_message,
             config=GenerateContentConfig(
                 system_instruction="Ты — дружелюбный и полезный ИИ-помощник. Отвечай на русском языке."
