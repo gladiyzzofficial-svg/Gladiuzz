@@ -30,7 +30,14 @@ print("✅ Webhook удалён, запускаем polling...")
 BOT_INFO = bot.get_me()
 BOT_USERNAME = BOT_INFO.username
 
-# ====================== GEMINI ======================
+# ====================== GEMINI AI ======================
+from google import genai
+from google.genai.types import GenerateContentConfig
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+print(f"🔑 GEMINI_API_KEY загружен: {'Да' if GEMINI_API_KEY and GEMINI_API_KEY.startswith('AIzaSy') else 'НЕТ или неправильный!'}")
+
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 def get_gemini_response(user_message):
@@ -42,10 +49,10 @@ def get_gemini_response(user_message):
                 system_instruction="Ты — дружелюбный и полезный ИИ-помощник. Отвечай на русском языке."
             )
         )
-        return response.text if response.text else "Не понял вопрос 😅"
+        return response.text if hasattr(response, 'text') and response.text else "Не понял вопрос 😅"
     except Exception as e:
         print(f"Gemini Error: {e}")
-        return "😔 Сейчас не могу ответить. Попробуй позже."
+        return "😔 Ошибка соединения с Gemini. Попробуй позже."
 
 # ====================== База и модерация ======================
 conn = sqlite3.connect('bot_data.db', check_same_thread=False)
