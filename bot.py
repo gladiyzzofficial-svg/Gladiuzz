@@ -24,6 +24,10 @@ bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook(drop_pending_updates=True)
 print("✅ Webhook успешно удалён")
 
+# Получаем информацию о боте
+BOT_INFO = bot.get_me()
+BOT_USERNAME = BOT_INFO.username
+
 # ====================== GEMINI ======================
 print(f"🔑 GEMINI_API_KEY загружен: {'Да ✅' if GEMINI_API_KEY.startswith('AIzaSy') else 'НЕТ ❌'}")
 
@@ -59,34 +63,33 @@ conn.commit()
 warnings = defaultdict(int)
 
 def is_spam(message):
-    if not message.text: 
+    if not message.text:
         return False
     text = message.text.lower()
     spam_keywords = ['подработка', 'зарплата', 'выплаты', 'студентам', 'молодым', 'специалистам', 'график', 'постоянно', 'найму', 'продам']
-    if any(kw in text for kw in spam_keywords): 
+    if any(kw in text for kw in spam_keywords):
         return True
-    if re.search(r'http|www|\.ru|\.com|тг|канал|@', text): 
+    if re.search(r'http|www|\.ru|\.com|тг|канал|@', text):
         return True
-    if len(text) > 180: 
+    if len(text) > 180:
         return True
     return False
 
-# ====================== ЕДИНЫЙ ОБРАБОТЧИК СООБЩЕНИЙ ======================
+# ====================== ЕДИНЫЙ ОБРАБОТЧИК ======================
 @bot.message_handler(func=lambda m: True)
 def handle_messages(message):
     text = message.text or ""
 
-    # --- ЧАСТЬ 1: Модерация (только для групп и супергрупп) ---
+    # Модерация в группах
     if message.chat.type in ['group', 'supergroup']:
         if is_spam(message):
             try:
                 bot.delete_message(message.chat.id, message.message_id)
-            except Exception as e:
-                print(f"Ошибка при удалении спама: {e}")
+            except:
+                pass
             return
 
-    # --- ЧАСТЬ 2: Общение с Gemini ИИ ---
-    # Личные сообщения
+    # Gemini в личных сообщениях
     if message.chat.type == "private":
         if text.startswith('/start'):
             return bot.send_message(message.chat.id, "Привет! Я Gemini. Пиши любой вопрос 😊")
@@ -95,10 +98,10 @@ def handle_messages(message):
         response = get_gemini_response(text)
         try:
             bot.edit_message_text(response, message.chat.id, wait.message_id)
-        except Exception as e:
-            print(f"Ошибка отправки сообщения: {e}")
+        except:
+            pass
 
-    # Групповые чаты (ответ на команду или упоминание бота)
+    # Gemini в группе
     elif message.chat.type in ['group', 'supergroup']:
         if f"@{BOT_USERNAME}" in text or any(cmd in text.lower() for cmd in ['/gemini', '/ai', '/ask']):
             clean_text = re.sub(r'^/(gemini|ai|ask)\s*', '', text).replace(f"@{BOT_USERNAME}", "").strip()
@@ -107,8 +110,9 @@ def handle_messages(message):
                 response = get_gemini_response(clean_text)
                 try:
                     bot.edit_message_text(response, message.chat.id, wait.message_id)
-                except Exception as e:
-                    print(f"Ошибка отправки ответа в группе: {e}")
+                except:
+                    pass
+
 
 print(f"✅ Бот @{BOT_USERNAME} с Gemini успешно запущен!")
 bot.infinity_polling()
