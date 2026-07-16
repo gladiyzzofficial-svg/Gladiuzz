@@ -13,9 +13,9 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 bot = telebot.TeleBot(TOKEN)
 
-# Удаляем webhook
+# Жёстко очищаем всё перед запуском
 bot.delete_webhook(drop_pending_updates=True)
-print("✅ Webhook удалён, запускаем polling...")
+print("✅ Webhook удалён")
 
 # ====================== GEMINI AI ======================
 from google import genai
