@@ -140,5 +140,51 @@ def handle_messages(message):
             response = get_gemini_response(clean_text)
             bot.edit_message_text(response, message.chat.id, wait.message_id)
 
+# ====================== GEMINI AI ======================
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+genai.configure(api_key=GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel(
+    model_name='gemini-1.5-flash',
+    system_instruction="Ты — дружелюбный ИИ-помощник. Отвечай коротко и по делу на русском."
+)
+
+def get_gemini_response(text):
+    try:
+        chat = gemini_model.start_chat()
+        response = chat.send_message(text)
+        return response.text
+    except:
+        return "😔 Сейчас не могу ответить. Попробуй позже."
+
+# Обработчик для Gemini (добавляется отдельно)
+@bot.message_handler(func=lambda m: True)
+def gemini_handler(message):
+    text = (message.text or "").lower().strip()
+    bot_username = bot.get_me().username.lower()
+
+    # В личных сообщениях — отвечаем почти на всё
+    if message.chat.type == "private":
+        if text in ['/start', '/help', 'старт', 'меню']:
+            return  # пусть работает твоя основная команда
+        if any(word in text for word in ['ии', 'ai', 'гемини', 'gemini', 'чат', 'вопрос']):
+            wait = bot.send_message(message.chat.id, "💭 Пишу ответ...")
+            response = get_gemini_response(message.text)
+            bot.edit_message_text(response, message.chat.id, wait.message_id)
+
+    # В группе — только по упоминанию
+    elif message.chat.type in ['group', 'supergroup']:
+        if f"@{bot_username}" in (message.text or "") or text.startswith(('/ai', '/gemini', '/ask')):
+            clean = (message.text or "").replace(f"@{bot_username}", "").strip()
+            clean = re.sub(r'^/(ai|gemini|ask)', '', clean).strip()
+            if clean:
+                wait = bot.reply_to(message, "💭 Думаю...")
+                response = get_gemini_response(clean)
+                bot.edit_message_text(response, message.chat.id, wait.message_id)
+
 print("✅ Бот с Gemini запущен!")
 bot.infinity_polling()
