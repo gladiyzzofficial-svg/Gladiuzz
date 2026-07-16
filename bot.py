@@ -8,35 +8,24 @@ import telebot
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-# Загружаем переменные окружения из файла .env
 load_dotenv()
 
-# Считываем токены из окружения
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not TOKEN:
-    raise ValueError("Ошибка: Токен Telegram-бота (TELEGRAM_TOKEN) не найден в файле .env!")
+    raise ValueError("TELEGRAM_TOKEN не найден!")
 if not GEMINI_API_KEY:
-    raise ValueError("Ошибка: API-ключ Gemini (GEMINI_API_KEY) не найден в файле .env!")
+    raise ValueError("GEMINI_API_KEY не найден!")
 
 bot = telebot.TeleBot(TOKEN)
 
-# Очищаем перед запуском
+# Жёсткая очистка
 bot.delete_webhook(drop_pending_updates=True)
-print("✅ Webhook удалён, запускаем polling...")
+print("✅ Webhook успешно удалён")
 
-# Получаем юзернейм бота один раз при старте
-BOT_INFO = bot.get_me()
-BOT_USERNAME = BOT_INFO.username
-
-# ====================== GEMINI AI ======================
-from google import genai
-from google.genai.types import GenerateContentConfig
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-print(f"🔑 GEMINI_API_KEY загружен: {'Да' if GEMINI_API_KEY and GEMINI_API_KEY.startswith('AIzaSy') else 'НЕТ или неправильный!'}")
+# ====================== GEMINI ======================
+print(f"🔑 GEMINI_API_KEY загружен: {'Да ✅' if GEMINI_API_KEY.startswith('AIzaSy') else 'НЕТ ❌'}")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -52,7 +41,7 @@ def get_gemini_response(user_message):
         return response.text if hasattr(response, 'text') and response.text else "Не понял вопрос 😅"
     except Exception as e:
         print(f"Gemini Error: {e}")
-        return "😔 Ошибка соединения с Gemini. Попробуй позже."
+        return "😔 Gemini сейчас недоступен. Попробуй позже."
 
 # ====================== База и модерация ======================
 conn = sqlite3.connect('bot_data.db', check_same_thread=False)
