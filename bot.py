@@ -1,7 +1,6 @@
 import os
 import re
 import sqlite3
-import datetime
 from collections import defaultdict
 from dotenv import load_dotenv
 import telebot
@@ -24,7 +23,7 @@ bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook(drop_pending_updates=True)
 print("✅ Webhook успешно удалён")
 
-# Получаем информацию о боте
+# Получаем username бота
 BOT_INFO = bot.get_me()
 BOT_USERNAME = BOT_INFO.username
 
@@ -75,7 +74,7 @@ def is_spam(message):
         return True
     return False
 
-# ====================== ЕДИНЫЙ ОБРАБОТЧИК ======================
+# ====================== ОБРАБОТЧИК СООБЩЕНИЙ ======================
 @bot.message_handler(func=lambda m: True)
 def handle_messages(message):
     text = message.text or ""
@@ -89,7 +88,7 @@ def handle_messages(message):
                 pass
             return
 
-    # Gemini в личных сообщениях
+    # Gemini в личке
     if message.chat.type == "private":
         if text.startswith('/start'):
             return bot.send_message(message.chat.id, "Привет! Я Gemini. Пиши любой вопрос 😊")
