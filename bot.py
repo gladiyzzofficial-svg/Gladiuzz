@@ -144,25 +144,26 @@ def handle_messages(message):
             response = get_gemini_response(clean_text)
             bot.edit_message_text(response, message.chat.id, wait.message_id)
 
-# ====================== GEMINI AI ======================
-import google.generativeai as genai
-from dotenv import load_dotenv
+# ====================== GEMINI AI (НОВАЯ ВЕРСИЯ) ======================
+from google import genai
+from google.genai import types
 
-load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
-    system_instruction="Ты — дружелюбный ИИ-помощник. Отвечай коротко и по делу на русском."
-)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-def get_gemini_response(text):
+def get_gemini_response(user_message):
     try:
-        chat = gemini_model.start_chat()
-        response = chat.send_message(text)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=user_message,
+            config=types.GenerateContentConfig(
+                system_instruction="Ты — дружелюбный и полезный ИИ-помощник. Отвечай на русском языке."
+            )
+        )
         return response.text
-    except:
+    except Exception as e:
+        print(f"Gemini Error: {e}")
         return "😔 Сейчас не могу ответить. Попробуй позже."
 
 # Обработчик для Gemini (добавляется отдельно)
