@@ -23,9 +23,10 @@ bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook(drop_pending_updates=True)
 print("✅ Webhook успешно удалён")
 
-# Получаем username бота
+# Получаем username бота СРАЗУ
 BOT_INFO = bot.get_me()
 BOT_USERNAME = BOT_INFO.username
+print(f"🤖 Бот запущен как: @{BOT_USERNAME}")
 
 # ====================== GEMINI ======================
 print(f"🔑 GEMINI_API_KEY загружен: {'Да ✅' if GEMINI_API_KEY.startswith('AIzaSy') else 'НЕТ ❌'}")
@@ -74,12 +75,11 @@ def is_spam(message):
         return True
     return False
 
-# ====================== ОБРАБОТЧИК СООБЩЕНИЙ ======================
+# ====================== ОБРАБОТЧИК ======================
 @bot.message_handler(func=lambda m: True)
 def handle_messages(message):
     text = message.text or ""
 
-    # Модерация в группах
     if message.chat.type in ['group', 'supergroup']:
         if is_spam(message):
             try:
@@ -88,7 +88,6 @@ def handle_messages(message):
                 pass
             return
 
-    # Gemini в личке
     if message.chat.type == "private":
         if text.startswith('/start'):
             return bot.send_message(message.chat.id, "Привет! Я Gemini. Пиши любой вопрос 😊")
@@ -100,7 +99,6 @@ def handle_messages(message):
         except:
             pass
 
-    # Gemini в группе
     elif message.chat.type in ['group', 'supergroup']:
         if f"@{BOT_USERNAME}" in text or any(cmd in text.lower() for cmd in ['/gemini', '/ai', '/ask']):
             clean_text = re.sub(r'^/(gemini|ai|ask)\s*', '', text).replace(f"@{BOT_USERNAME}", "").strip()
