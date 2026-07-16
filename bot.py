@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = "8640562446:AAHMHBTGoGwAPwFp4N90AM11HHMJQY1dnGA"
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("AQ.Ab8RN6LHEVIRMrGugfGgUniYW9LTPaX6TD1ymPJeKT70Fw5LqQ")
 
 bot = telebot.TeleBot(TOKEN)
 
