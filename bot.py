@@ -8,13 +8,17 @@ import telebot
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-# Загружаем переменные окружения
+# Загружаем переменные окружения из файла .env
 load_dotenv()
 
-# Рекомендуется перенести токен в .env (например, TELEGRAM_TOKEN)
-# Сейчас оставим переменную, но лучше загружать её через os.getenv
-TOKEN = os.getenv("TELEGRAM_TOKEN") or "8640562446:AAF4_DDjpAv6ADTdPNwSO6L5jw6tkejckc4"
+# Считываем токены из окружения
+TOKEN = os.getenv("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not TOKEN:
+    raise ValueError("Ошибка: Токен Telegram-бота (TELEGRAM_TOKEN) не найден в файле .env!")
+if not GEMINI_API_KEY:
+    raise ValueError("Ошибка: API-ключ Gemini (GEMINI_API_KEY) не найден в файле .env!")
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -22,7 +26,7 @@ bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook(drop_pending_updates=True)
 print("✅ Webhook удалён, запускаем polling...")
 
-# Получаем юзернейм бота один раз при старте, чтобы не перегружать API
+# Получаем юзернейм бота один раз при старте
 BOT_INFO = bot.get_me()
 BOT_USERNAME = BOT_INFO.username
 
@@ -38,7 +42,7 @@ def get_gemini_response(user_message):
                 system_instruction="Ты — дружелюбный и полезный ИИ-помощник. Отвечай на русском языке."
             )
         )
-        return response.text if hasattr(response, 'text') and response.text else "Не понял вопрос 😅"
+        return response.text if response.text else "Не понял вопрос 😅"
     except Exception as e:
         print(f"Gemini Error: {e}")
         return "😔 Сейчас не могу ответить. Попробуй позже."
@@ -78,17 +82,12 @@ def handle_messages(message):
 
     # --- ЧАСТЬ 1: Модерация (только для групп и супергрупп) ---
     if message.chat.type in ['group', 'supergroup']:
-        # Выполняем проверку на спам
         if is_spam(message):
             try:
                 bot.delete_message(message.chat.id, message.message_id)
-                # Здесь можно добавить выдачу предупреждения или бан
             except Exception as e:
                 print(f"Ошибка при удалении спама: {e}")
-            return # Прерываем выполнение, чтобы спам-сообщение не обрабатывалось ИИ
-
-        # Сюда вы можете вставить вашу остальную логику модерации
-        # (например, проверку на запрещенные слова bad_words)
+            return
 
     # --- ЧАСТЬ 2: Общение с Gemini ИИ ---
     # Личные сообщения
@@ -106,7 +105,6 @@ def handle_messages(message):
     # Групповые чаты (ответ на команду или упоминание бота)
     elif message.chat.type in ['group', 'supergroup']:
         if f"@{BOT_USERNAME}" in text or any(cmd in text.lower() for cmd in ['/gemini', '/ai', '/ask']):
-            # Очищаем текст сообщения от команд и юзернейма бота
             clean_text = re.sub(r'^/(gemini|ai|ask)\s*', '', text).replace(f"@{BOT_USERNAME}", "").strip()
             if clean_text:
                 wait = bot.reply_to(message, "💭 Думаю...")
