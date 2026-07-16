@@ -13,7 +13,7 @@ load_dotenv()
 
 # Рекомендуется перенести токен в .env (например, TELEGRAM_TOKEN)
 # Сейчас оставим переменную, но лучше загружать её через os.getenv
-TOKEN = os.getenv("TELEGRAM_TOKEN") or "8640562446:AAHMHBTGoGwAPwFp4N90AM11HHMJQY1dnGA"
+TOKEN = os.getenv("TELEGRAM_TOKEN") or "8640562446:AAF4_DDjpAv6ADTdPNwSO6L5jw6tkejckc4"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 bot = telebot.TeleBot(TOKEN)
